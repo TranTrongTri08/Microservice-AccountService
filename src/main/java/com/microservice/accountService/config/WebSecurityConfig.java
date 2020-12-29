@@ -1,7 +1,10 @@
 package com.microservice.accountService.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.bus.BusProperties.Env;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -12,6 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
+	@Autowired
+	private Environment environment;
+	
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -20,6 +26,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable(); // By default CSRF will be enabled
-		http.authorizeRequests().antMatchers("/accounts/**").permitAll();
+		http.authorizeRequests().antMatchers("/accounts/**").permitAll().
+		and().authorizeRequests().antMatchers(environment.getProperty("actuator.url.path")).permitAll();
 	}
 }
